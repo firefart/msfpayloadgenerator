@@ -11,7 +11,6 @@
 # Or:
 #   pip install netifaces requests
 
-
 import subprocess
 import os
 import shutil
