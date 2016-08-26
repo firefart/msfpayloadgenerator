@@ -20,7 +20,7 @@ from urllib.parse import urlparse
 from netifaces import AF_INET, ifaddresses
 
 SERVER = ifaddresses('eth0')[AF_INET][0]['addr']
-WEBSERVER_PORT = "8000"
+WEBSERVER_PORT = 8000
 
 PS_REV_TCP_URL = "https://raw.githubusercontent.com/samratashok/nishang/master/Shells/Invoke-PowerShellTcp.ps1"
 PS_INV_SC_URL = "https://raw.githubusercontent.com/PowerShellMafia/PowerSploit/master/CodeExecution/Invoke-Shellcode.ps1"
