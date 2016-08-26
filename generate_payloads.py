@@ -141,32 +141,32 @@ def setup_wine():
 
 PAYLOADS = [
     # exes
-    {'filename': 'reverse_http', 'payload': 'windows/meterpreter/reverse_http', 'port': '8001', 'format': 'exe'},
-    {'filename': 'reverse_https', 'payload': 'windows/meterpreter/reverse_https', 'port': '8002', 'format': 'exe'},
-    {'filename': 'reverse_tcp', 'payload': 'windows/meterpreter/reverse_tcp', 'port': '8003', 'format': 'exe'},
-    {'filename': 'meterpreter_reverse_http', 'payload': 'windows/meterpreter_reverse_http', 'port': '8004', 'format': 'exe'},
-    {'filename': 'meterpreter_reverse_https', 'payload': 'windows/meterpreter_reverse_https', 'port': '8005', 'format': 'exe'},
-    {'filename': 'meterpreter_reverse_tcp', 'payload': 'windows/meterpreter_reverse_tcp', 'port': '8006', 'format': 'exe'},
-    {'filename': 'reverse_tcp', 'payload': 'windows/shell/reverse_tcp', 'port': '8007', 'format': 'exe'},
-    {'filename': 'shell_reverse_tcp', 'payload': 'windows/shell_reverse_tcp', 'port': '8008', 'format': 'exe'},
+    {'filename': 'reverse_http', 'payload': 'windows/meterpreter/reverse_http', 'port': 8001, 'format': 'exe'},
+    {'filename': 'reverse_https', 'payload': 'windows/meterpreter/reverse_https', 'port': 8002, 'format': 'exe'},
+    {'filename': 'reverse_tcp', 'payload': 'windows/meterpreter/reverse_tcp', 'port': 8003, 'format': 'exe'},
+    {'filename': 'meterpreter_reverse_http', 'payload': 'windows/meterpreter_reverse_http', 'port': 8004, 'format': 'exe'},
+    {'filename': 'meterpreter_reverse_https', 'payload': 'windows/meterpreter_reverse_https', 'port': 8005, 'format': 'exe'},
+    {'filename': 'meterpreter_reverse_tcp', 'payload': 'windows/meterpreter_reverse_tcp', 'port': 8006, 'format': 'exe'},
+    {'filename': 'reverse_tcp', 'payload': 'windows/shell/reverse_tcp', 'port': 8007, 'format': 'exe'},
+    {'filename': 'shell_reverse_tcp', 'payload': 'windows/shell_reverse_tcp', 'port': 8008, 'format': 'exe'},
     # python stuff
-    {'filename': 'reverse_http_py', 'payload': 'windows/meterpreter/reverse_http', 'port': '8101', 'format': 'py'},
-    {'filename': 'reverse_https_py', 'payload': 'windows/meterpreter/reverse_https', 'port': '8102', 'format': 'py'},
-    {'filename': 'reverse_tcp_py', 'payload': 'windows/meterpreter/reverse_tcp', 'port': '8103', 'format': 'py'},
-    {'filename': 'meterpreter_reverse_http_py', 'payload': 'windows/meterpreter_reverse_http', 'port': '8104', 'format': 'py'},
-    {'filename': 'meterpreter_reverse_https_py', 'payload': 'windows/meterpreter_reverse_https', 'port': '8105', 'format': 'py'},
-    {'filename': 'meterpreter_reverse_tcp_py', 'payload': 'windows/meterpreter_reverse_tcp', 'port': '8106', 'format': 'py'},
-    {'filename': 'reverse_tcp_py', 'payload': 'windows/shell/reverse_tcp', 'port': '8107', 'format': 'py'},
-    {'filename': 'shell_reverse_tcp_py', 'payload': 'windows/shell_reverse_tcp', 'port': '8108', 'format': 'py'},
+    {'filename': 'reverse_http_py', 'payload': 'windows/meterpreter/reverse_http', 'port': 8101, 'format': 'py'},
+    {'filename': 'reverse_https_py', 'payload': 'windows/meterpreter/reverse_https', 'port': 8102, 'format': 'py'},
+    {'filename': 'reverse_tcp_py', 'payload': 'windows/meterpreter/reverse_tcp', 'port': 8103, 'format': 'py'},
+    {'filename': 'meterpreter_reverse_http_py', 'payload': 'windows/meterpreter_reverse_http', 'port': 8104, 'format': 'py'},
+    {'filename': 'meterpreter_reverse_https_py', 'payload': 'windows/meterpreter_reverse_https', 'port': 8105, 'format': 'py'},
+    {'filename': 'meterpreter_reverse_tcp_py', 'payload': 'windows/meterpreter_reverse_tcp', 'port': 8106, 'format': 'py'},
+    {'filename': 'reverse_tcp_py', 'payload': 'windows/shell/reverse_tcp', 'port': 8107, 'format': 'py'},
+    {'filename': 'shell_reverse_tcp_py', 'payload': 'windows/shell_reverse_tcp', 'port': 8108, 'format': 'py'},
     # invoke shellcode stuff
-    {'filename': 'reverse_http_ps', 'payload': 'windows/meterpreter/reverse_http', 'port': '8201', 'format': 'ps1'},
-    {'filename': 'reverse_https_ps', 'payload': 'windows/meterpreter/reverse_https', 'port': '8202', 'format': 'ps1'},
-    {'filename': 'reverse_tcp_ps', 'payload': 'windows/meterpreter/reverse_tcp', 'port': '8203', 'format': 'ps1'},
-    {'filename': 'meterpreter_reverse_http_ps', 'payload': 'windows/meterpreter_reverse_http', 'port': '8204', 'format': 'ps1'},
-    {'filename': 'meterpreter_reverse_https_ps', 'payload': 'windows/meterpreter_reverse_https', 'port': '8205', 'format': 'ps1'},
-    {'filename': 'meterpreter_reverse_tcp_ps', 'payload': 'windows/meterpreter_reverse_tcp', 'port': '8206', 'format': 'ps1'},
-    {'filename': 'reverse_tcp_ps', 'payload': 'windows/shell/reverse_tcp', 'port': '8207', 'format': 'ps1'},
-    {'filename': 'shell_reverse_tcp_ps', 'payload': 'windows/shell_reverse_tcp', 'port': '8208', 'format': 'ps1'}
+    {'filename': 'reverse_http_ps', 'payload': 'windows/meterpreter/reverse_http', 'port': 8201, 'format': 'ps1'},
+    {'filename': 'reverse_https_ps', 'payload': 'windows/meterpreter/reverse_https', 'port': 8202, 'format': 'ps1'},
+    {'filename': 'reverse_tcp_ps', 'payload': 'windows/meterpreter/reverse_tcp', 'port': 8203, 'format': 'ps1'},
+    {'filename': 'meterpreter_reverse_http_ps', 'payload': 'windows/meterpreter_reverse_http', 'port': 8204, 'format': 'ps1'},
+    {'filename': 'meterpreter_reverse_https_ps', 'payload': 'windows/meterpreter_reverse_https', 'port': 8205, 'format': 'ps1'},
+    {'filename': 'meterpreter_reverse_tcp_ps', 'payload': 'windows/meterpreter_reverse_tcp', 'port': 8206, 'format': 'ps1'},
+    {'filename': 'reverse_tcp_ps', 'payload': 'windows/shell/reverse_tcp', 'port': 8207, 'format': 'ps1'},
+    {'filename': 'shell_reverse_tcp_ps', 'payload': 'windows/shell_reverse_tcp', 'port': 8208, 'format': 'ps1'}
 ]
 
 ADDITIONAL_HANDLERS = [
