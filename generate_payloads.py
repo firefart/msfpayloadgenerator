@@ -117,7 +117,7 @@ def get_wine_env():
 
 
 def setup_wine():
-    print("Setting up wine environmen")
+    print("Setting up wine environment")
     if os.path.exists(WINE_DIR):
         print("Removing old wine dir {}".format(WINE_DIR))
         shutil.rmtree(WINE_DIR)
