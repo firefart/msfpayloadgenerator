@@ -239,7 +239,7 @@ for p in PAYLOADS:
         with open(tmp_file, 'wt') as tf:
             tf.write(PY_TEMPLATE.format(buf))
         print("Generating Python executable")
-        execute_command('wine pyinstaller --onefile --distpath=. {}'.format(tmp_file), get_wine_env())
+        execute_command('wine pyinstaller --onefile --distpath={} {}'.format(OUTPUT_DIR, tmp_file), get_wine_env())
         os.remove('{}/{}.spec'.format(OUTPUT_DIR, p['filename']))
         os.remove(tmp_file)
         print("Done")
