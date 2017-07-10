@@ -26,3 +26,5 @@ pip install netifaces requests
 ```
 
 After executing the main script start `webserver.py` in the output directory to download the files on the victim machine.
+
+Also be sure to start `msfconsole -x -r output/handler.rc` to create all necessary listeners.
