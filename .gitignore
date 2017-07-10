@@ -1,6 +1,9 @@
 .idea/
 wine/
 output/
+build/
 output.txt
 *.msi
 handler.rc
+*.spec
+*.zip
