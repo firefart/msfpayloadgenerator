@@ -1,1 +1,4 @@
 .idea/
+wine/
+output.txt
+*.msi
