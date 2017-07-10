@@ -3,8 +3,10 @@ Generates some metasploit payloads for testing
 
 - Normal exes
 - UPX packed
-- Python compiled to exes
+- Python compiled to exes (also UPX packed)
 - Powershell stuff
+- Java Payloads (execute with java -jar payload.jar)
+- Some raw payloads to be executed on a command shell
 
 To install on 64bit Ubuntu/Debian:
 ```
