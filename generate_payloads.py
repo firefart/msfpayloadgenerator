@@ -33,7 +33,7 @@ WEBSERVER_PORT = 8000
 PS_REV_TCP_URL = "https://raw.githubusercontent.com/samratashok/nishang/master/Shells/Invoke-PowerShellTcp.ps1"
 PS_INV_SC_URL = "https://raw.githubusercontent.com/PowerShellMafia/PowerSploit/master/CodeExecution/Invoke-Shellcode.ps1"
 
-PYTHON_DOWNLOAD_URL = "https://www.python.org/ftp/python/2.7.13/python-2.7.13.msi"
+PYTHON_DOWNLOAD_URL = "https://www.python.org/ftp/python/2.7.14/python-2.7.14.msi"
 PYTHON_MSI = os.path.basename(urlparse(PYTHON_DOWNLOAD_URL).path)
 
 UPX_DOWNLOAD_URL = "https://github.com/upx/upx/releases/download/v3.94/upx394w.zip"
